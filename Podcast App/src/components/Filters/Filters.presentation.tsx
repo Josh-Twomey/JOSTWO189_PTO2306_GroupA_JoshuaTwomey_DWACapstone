@@ -1,0 +1,113 @@
+import {
+  Button,
+  Dialog,
+  TextField,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Alert,
+} from "@mui/material";
+import styled from "@emotion/styled";
+import { FormEvent, useState, useRef, useEffect } from "react";
+import z from "zod";
+import { useSpring, animated } from "@react-spring/web";
+
+const StyledAlert = styled(Alert)<{ error: string | null }>`
+  margin-top: 1rem;
+  height: ${(props) => (props.error ? "auto" : "0.2rem")};
+`;
+
+const StyledContent = styled.div`
+  width: 100%;
+  max-width: 20rem;
+`;
+const response = z.object({
+  search: z
+    .string()
+    .min(3, { message: "Search needs to be empty or atleast 3 characters" })
+    .optional()
+    .or(z.literal("")),
+});
+
+export type Response = z.infer<typeof response>;
+
+export type Presentation = {
+  filter: string;
+  onSubmit: (response: Response) => void;
+  toggleFilter: () => void;
+};
+
+const useFilters = ({ onSubmit }: Presentation) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const isStarting = useRef(true);
+
+  const styles = useSpring({
+    from: { opacity: error || isStarting ? 0 : 1 },
+    to: { opacity: error ? 1 : 0 },
+  });
+
+  useEffect(() => {
+    isStarting.current = false;
+  }, []);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const entries = new FormData(event.target as any);
+    const transformed = Object.fromEntries(entries);
+    const validation = response.safeParse(transformed);
+    if (!validation.success) {
+      const { error } = validation;
+      return setError(error.issues[0].message);
+    }
+    setError(null);
+    const { data } = validation;
+    onSubmit(data);
+  };
+
+  return {
+    error,
+    styles,
+    handleSubmit,
+  };
+};
+
+export const Presentation = (props: Presentation) => {
+  const { toggleFilter } = props;
+  const { error, handleSubmit, styles } = useFilters(props);
+  return (
+    <>
+      <Dialog open>
+        <StyledContent>
+          <DialogTitle>Filters</DialogTitle>
+
+          <DialogContent>
+            <form id="filters" onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                name="search"
+                placeholder="Any"
+                variant="filled"
+                label="Search"
+              />
+            </form>
+            <animated.div style={styles}>
+              <StyledAlert error={error} severity="warning">
+                {error}
+              </StyledAlert>
+            </animated.div>
+          </DialogContent>
+
+          <DialogActions>
+            <Button variant="outlined" onClick={toggleFilter}>
+              Cancel
+            </Button>
+            <Button variant="contained" type="submit" form="filters">
+              Apply
+            </Button>
+          </DialogActions>
+        </StyledContent>
+      </Dialog>
+    </>
+  );
+};
