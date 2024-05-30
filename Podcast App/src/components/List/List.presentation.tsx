@@ -32,10 +32,10 @@ export type Presentation = {
   phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
   podcasts: Preview[];
   filter: string;
+  sort: number;
   toggleFilter: () => void;
   configuration: JSX.Element;
-  audioplayer: JSX.Element;
-  onSelect: ( id: number) => void
+  onSelect: (id: number) => void;
 };
 
 const Row = styled.div`
@@ -53,7 +53,33 @@ const Wrapper = styled.div`
 `;
 
 export const Presentation = (props: Presentation) => {
-  const { podcasts, phase, filter, configuration, toggleFilter, onSelect } = props;
+  const { podcasts, phase, filter, sort, configuration, toggleFilter, onSelect } = props;
+
+  const podcastSort = (podcast: Preview[], sort: number) => {
+    switch (sort) {
+      case 0:
+        return podcast;
+      case 1:
+        return [...podcast].sort((a, b) => a.title.localeCompare(b.title));
+      case 2:
+        return [...podcast].sort((a, b) => a.title.localeCompare(b.title) * -1);
+      case 3:
+        return [...podcast].sort(
+          (a, b) =>
+            new Date(a.updated).getTime() - new Date(b.updated).getTime()
+        );
+      case 4:
+        return [...podcast].sort(
+          (a, b) =>
+            new Date(b.updated).getTime() - new Date(a.updated).getTime()
+        );
+      default:
+        throw new Error("Invalid sort option");
+    }
+  };
+    
+    
+    
   return (
     <>
       <Navbar />
@@ -73,7 +99,7 @@ export const Presentation = (props: Presentation) => {
         </Row>
         <Grid>
           {phase === "LISTING" &&
-            podcasts
+            podcastSort(podcasts,sort)
               .filter((item) => {
                 if (filter.trim() === "") return true;
                 return item.title.toLowerCase().includes(filter.toLowerCase());
@@ -81,8 +107,8 @@ export const Presentation = (props: Presentation) => {
               .map((innerProps) => {
                 const clickHandler = () => onSelect(parseInt(innerProps.id));
                 return (
-                  <div onClick={clickHandler}>
-                    <Preview key={innerProps.id} {...innerProps} />
+                  <div onClick={clickHandler} key={innerProps.id}>
+                    <Preview {...innerProps} />
                   </div>
                 );
               })}

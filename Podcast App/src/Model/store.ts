@@ -35,36 +35,59 @@ type Preview = {
   updated: string;
 };
 
+type Podcast = {
+  audio: "PLAYING" | "NULL";
+  season: number;
+  episode: number;
+  channel: Show;
+}
 type Store = {
   phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
   list: Preview[];
   show: Show;
+  timestamp: number;
+  sort: number;
+  podcast: Podcast;
   filter: string;
   toggleFilter: () => void;
   updateSearch: (value: string) => void;
+  updateSort: (value: number) => void;
 };
 
-const createTypedStore = createZustandStore<Store>();
-
-export const createStore = (api : Api) : StoreApi<Store> => {
-    const store = createTypedStore((set, get) => ({
-        phase: "LOADING",
-        list: [],
-        show: {id: "",
+const showBase = {id: "",
         title: "",
         description: "",
         seasons: [],
         image: "",
         genres: [],
-        updated: "",},
-        filter: "",
-        updateSearch: ( value?: string ) => {
-            set({ phase: "LISTING", filter: value || ""})
-        },
-        toggleFilter: () => {
-            const { phase } = get() 
-            return set({phase: phase === "SEARCH" ? "LISTING" : "SEARCH"})
-        }
+        updated: "",}
+
+const createTypedStore = createZustandStore<Store>();
+
+export const createStore = (api : Api) : StoreApi<Store> => {
+    const store = createTypedStore((set, get) => ({
+      phase: "LOADING",
+      timestamp: 0,
+      sort: 0,
+      podcast: {
+        audio: "NULL",
+        season: 0,
+        episode: 0,
+        channel: showBase,
+      },
+      list: [],
+      show: showBase,
+      filter: "",
+      updateSearch: (value?: string) => {
+        set({ phase: "LISTING", filter: value || "" });
+      },
+      updateSort: (value?: number) => {
+        set({ phase: "LISTING", sort: value});
+      },
+      toggleFilter: () => {
+        const { phase } = get();
+        return set({ phase: phase === "SEARCH" ? "LISTING" : "SEARCH" });
+      },
     }));
 
     api.getPodcastList().then( data => {
@@ -81,6 +104,12 @@ export const createStore = (api : Api) : StoreApi<Store> => {
 
 
     return store
+}
+
+export const closeDisplay = () => {
+  return store.setState({
+    phase: "LISTING",
+  });
 }
 
 export const getShow = (id: string): StoreApi<Store> => {
@@ -100,6 +129,27 @@ export const getShow = (id: string): StoreApi<Store> => {
   return store;
 };
 
+export const playAudio = (episode: number, season: number, show: Show): StoreApi<Store> => {
+  store.setState({podcast: {
+    episode: episode,
+    season: season,
+    audio: "PLAYING",
+    channel: show,
+  }})
+
+  return store
+}
+
+export const stopAudio = (episode: number, season: number, show: Show) => {
+  store.setState({
+    podcast: {
+      episode: episode,
+      season: season,
+      audio: "NULL",
+      channel: show,
+    },
+  });
+};
 
 const api = createApi();
 export const store = createStore(api);

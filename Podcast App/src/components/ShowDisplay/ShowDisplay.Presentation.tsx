@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
 import { Global, css } from "@emotion/react";
 import React from "react";
+import IconButton from "@mui/material/IconButton";
+import { Close } from "@mui/icons-material";
 import {
   CssBaseline,
   Typography,
@@ -8,8 +10,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material";
 import { ShowPreview } from "../ShowPreview";
+import { playAudio } from "../../Model";
 
 const global = css`
   body {
@@ -31,12 +35,21 @@ export type Seasons = {
   episodes: Episodes[];
 };
 
-export type Presentation = {
-  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
+type Show = {
+  id: string;
   title: string;
   description: string;
   seasons: Seasons[];
   image: string;
+  genres: string[];
+  updated: string;
+};
+
+export type Presentation = {
+  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
+  description: string;
+  seasons: Seasons[];
+  podcast: Show;
   onClose: () => void;
 };
 
@@ -71,12 +84,25 @@ const Description = styled(Typography)`
   font-size: 14px;
 `;
 
+const Icon = styled(IconButton)`
+  color: #dcdcdc;
+  background-color: grey;
+  padding:1rem;
+  position: sticky;
+  top: 40px;
+  left: 93%;
+  :hover {
+    background-color: #dcdcdc;
+    color: grey;
+  }
+`;
+
 export const ShowDisplay = (props: Presentation) => {
-  const { title, description, seasons, image, phase } = props;
+  const { description, seasons, phase, onClose, podcast } = props;
   const [seasonIndex, setSeasonIndex] = React.useState(0);
 
-  const onClick = (id : number) => {
-    
+  const onClick = (episodeIndex : number) => {
+    playAudio(episodeIndex,seasonIndex,podcast)
   }
 
   const handleChange = (event: any) => {
@@ -88,42 +114,51 @@ export const ShowDisplay = (props: Presentation) => {
     <>
       <CssBaseline />
       <Global styles={global} />
-      {phase ==="SHOW" &&<Wrapper>
-        <Row>
-          <Title>{title}</Title>
-          <Image src={image} />
-          <Description>{description}</Description>
+      <Icon onClick={onClose}>
+        <Close />
+      </Icon>
+      {phase === "SHOW" && (
+        <Wrapper>
+          <Row>
+            <Title>{seasons[seasonIndex].title}</Title>
+            <Image src={seasons[seasonIndex].image} />
+            <Description>{description}</Description>
 
-          <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="select-helper-label">Season</InputLabel>
-            <Select
-              labelId="select-helper-label"
-              id="select-helper"
-              value={seasonIndex}
-              label="Season"
-              onChange={handleChange}
-            >
-              {seasons.map((item, index) => {
-                return <MenuItem value={index}>{item.season}</MenuItem>;
-              })}
-            </Select>
-          </FormControl>
+            <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="select-helper-label">Season</InputLabel>
+              <Select
+                labelId="select-helper-label"
+                id="select-helper"
+                value={seasonIndex}
+                label="Season"
+                onChange={handleChange}
+              >
+                {seasons.map((item, index) => {
+                  return (
+                    <MenuItem key={index} value={index}>
+                      {item.season}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
 
-          {seasons[seasonIndex].episodes.map((item,index) => {
-            return (
-              <ShowPreview
-                key={index}
-                id={index}
-                file={item.file}
-                title={item.title}
-                description={item.description}
-                episode={item.episode}
-                handleClick={onClick}
-              />
-            );
-          })}
-        </Row>
-      </Wrapper>}
+            {seasons[seasonIndex].episodes.map((item, index) => {
+              return (
+                <ShowPreview
+                  key={index}
+                  id={index}
+                  file={item.file}
+                  title={item.title}
+                  description={item.description}
+                  episode={item.episode}
+                  handleClick={onClick}
+                />
+              );
+            })}
+          </Row>
+        </Wrapper>
+      )}
     </>
   );
 };

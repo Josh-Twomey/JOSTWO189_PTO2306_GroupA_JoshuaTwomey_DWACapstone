@@ -9,6 +9,7 @@ export const List = ( props : { configuration: JSX.Element }) => {
   const phase = useStore(store, (state) => state.phase);
   const podcasts = useStore(store, (state) => state.list);
   const filter = useStore(store, (state) => state.filter);
+  const sort = useStore(store, (state) => state.sort);
   const toggleFilter = useStore(store, (state) => state.toggleFilter);
   const navigate = useNavigate()
 
@@ -17,6 +18,7 @@ export const List = ( props : { configuration: JSX.Element }) => {
       podcasts={podcasts}
       phase={phase}
       filter={filter}
+      sort={sort}
       configuration={configuration}
       toggleFilter={toggleFilter}
       onSelect={value => navigate(`/podcast/${value}`)}

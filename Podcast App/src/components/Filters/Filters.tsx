@@ -9,12 +9,15 @@ export const Filters = () => {
   const filter = useStore(store, (state) => state.filter);
   const toggleFilter = useStore(store, (state) => state.toggleFilter);
   const updateSearch = useStore(store, (state) => state.updateSearch);
-
+  const updateSort = useStore(store, (state) => state.updateSort);
+  const sort = useStore(store, (state) => state.sort);
   return (
     <Presentation
       filter={filter}
-      onSubmit={({ search }) => {
+      sort={sort}
+      onSubmit={({ search, sort }) => {
         updateSearch(search || "");
+        updateSort(parseInt(sort));
       }}
       toggleFilter={toggleFilter}
     />

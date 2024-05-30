@@ -9,6 +9,10 @@ justify-content: center;
 align-items: center;
 `
 
+type Volume = {
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+}; 
+
 const Icon = styled(IconButton)`
 color: #dcdcdc;
 font-size: 1rem;
@@ -18,12 +22,12 @@ const VolumeBar = styled.input`
   height: 7px;
 `;
 
-export const Volume = ({audioRef}) => {
+export const Volume = ({audioRef}: Volume) => {
   const [volume, setVolume] = useState(60);
   const [muteVolume, setMuteVolume] = useState(false);
 
   useEffect(() => {
-    if (audioRef) {
+    if (audioRef.current) {
       audioRef.current.volume = volume / 100;
       audioRef.current.muted = muteVolume;
     }
@@ -45,7 +49,7 @@ export const Volume = ({audioRef}) => {
         min={0}
         max={100}
         value={volume}
-        onChange={(e) => setVolume(e.target.value)}
+        onChange={(e) => setVolume(parseInt(e.target.value))}
       />
     </Wrapper>
   );

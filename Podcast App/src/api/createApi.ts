@@ -45,21 +45,26 @@ export type API = {
   >;
 };
 
-const episodeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  episode: z.number(),
-  file: z.string(),
-});
+const episodeSchema = z
+  .object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    episode: z.number().optional(),
+    file: z.string().optional(),
+  })
+  .optional();
 
-const seasonSchema = z.object({
-  season: z.number(),
-  title: z.string(),
-  image: z.string().url(),
-  episodes: z.array(episodeSchema),
-});
+const seasonSchema = z
+  .object({
+    season: z.number().optional(),
+    title: z.string().optional(),
+    image: z.string().url().optional(),
+    episodes: z.array(episodeSchema).optional(),
+  })
+  .optional();
 
-const zodgetPodcastList = z.array(z.object({
+const zodgetPodcastList = z.array(
+  z.object({
     id: z.string(),
     title: z.string(),
     description: z.string(),
@@ -67,17 +72,18 @@ const zodgetPodcastList = z.array(z.object({
     image: z.string(),
     genres: z.array(z.number()),
     updated: z.string(),
-}))
+  })
+);
 
 const zodgetPodcastInfo = z.object({
-    id: z.string(),
-    title: z.string(),
-    description: z.string(),
-    seasons: z.array(seasonSchema),
-    image: z.string(),
-    genres: z.array(z.string()),
-    updated: z.string(),
-  });
+  id: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  seasons: z.array(seasonSchema).optional(),
+  image: z.string().optional(),
+  genres: z.array(z.string()).optional(),
+  updated: z.string().optional(),
+});
 
 
 
