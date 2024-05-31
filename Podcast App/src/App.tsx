@@ -5,6 +5,7 @@ import { Single } from "./components/ShowDisplay"
 import { useStore } from "zustand"
 import { store } from "./Model"
 import { AudioPlayingTest } from "./components/AudioPlayer/AudioPlayer"
+import { AuthPresentation } from "./components/Auth/Auth.Presentation"
 
 export const App = () => {
   const playingAudio = useStore(store, (state) => state.podcast.audio);
@@ -12,8 +13,9 @@ export const App = () => {
     <>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<AuthPresentation/>}/>
           <Route path="/podcast/:id" element={<Single />} />
-          <Route path="/" element={<List configuration={<Filters />} />} />
+          <Route path="/list" element={<List configuration={<Filters />} />} />
         </Routes>
       </BrowserRouter>
       {playingAudio === "PLAYING" && <AudioPlayingTest />}

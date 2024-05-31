@@ -27,7 +27,7 @@ export const Single = () => {
       seasons={podcast.seasons}
       podcast={podcast}
       onClose={() => {
-        navigate("/")
+        navigate("/list")
         closeDisplay()
       }}
     />
