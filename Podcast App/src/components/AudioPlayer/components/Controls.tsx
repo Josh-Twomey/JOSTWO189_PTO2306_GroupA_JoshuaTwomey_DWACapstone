@@ -18,15 +18,27 @@ type Controls = {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   progressBarRef: React.MutableRefObject<HTMLProgressElement | null>;
   duration: number;
+  timeProgress: number;
   setTimeProgress: React.Dispatch<React.SetStateAction<number>>;
   handleNext: () => void;
   handlePrev: () => void;
+  updateDBTable: () => void;
+  history: number;
 };
 
-const Controls = ({ audioRef, progressBarRef, duration, setTimeProgress, handleNext, handlePrev } : Controls) => {
-  const [isPlaying, setIsPlaying] = useState(true);
+const Controls = ({ audioRef, progressBarRef, duration, setTimeProgress, updateDBTable, handleNext, history, handlePrev } : Controls) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime += history;
+    }
+  }, [history,audioRef]);
 
   const togglePlayPause = () => {
+    if (isPlaying) {
+      updateDBTable()
+    }
     setIsPlaying((prev) => !prev);
   };
 

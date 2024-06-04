@@ -1,16 +1,8 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { Button, ButtonBase, Typography} from "@mui/material";
-import { createClient } from "@supabase/supabase-js";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate } from "react-router-dom";
-
-
-const supabase = createClient(
-  "https://hzzrysdlytckseaafymp.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6enJ5c2RseXRja3NlYWFmeW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxNDYzODcsImV4cCI6MjAzMjcyMjM4N30.VQfbvCoS0eZVnh9O5P23d9LmjH2uTcCleIlce3z349o"
-);
+import { supabase } from "../Auth";
 
 const Container = styled.div`
   width: 100%;
@@ -57,10 +49,14 @@ export const Navbar = () => {
     getUserData()
   }, [])
 
-
   async function signOutUser() {
-    const { error } = await supabase.auth.signOut()
-    navigate("/")
+    try {
+      await supabase.auth.signOut()
+      navigate("/")
+    } catch (error: any) {
+      alert(error.message)
+    }
+    
   } 
   return (
     <>

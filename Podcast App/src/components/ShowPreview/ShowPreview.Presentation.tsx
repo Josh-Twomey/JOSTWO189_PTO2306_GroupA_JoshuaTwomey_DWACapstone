@@ -1,12 +1,21 @@
 import styled from "@emotion/styled";
-import { PlayCircleOutlineTwoTone } from "@mui/icons-material";
-import { Paper, Typography, Button } from "@mui/material";
+import { useState, useEffect } from "react";
+import {
+  FavoriteBorder,
+  Favorite,
+  PlayCircleOutlineTwoTone,
+} from "@mui/icons-material";
+import { IconButton, Typography, Paper, Button } from "@mui/material";
+import { supabase } from "../Auth"; // Assuming Auth.js holds Supabase instance
 
 const Title = styled(Typography)`
   font-size: 1rem;
-  padding: 1rem;
-  padding-bottom: 0.25rem;
+  padding-top: 2rem;
   font-weight: 600;
+`;
+
+const Icon = styled(IconButton)`
+  color: grey;
 `;
 
 const Episode = styled(Typography)`
@@ -17,7 +26,7 @@ const Episode = styled(Typography)`
   background-color: grey;
   color: white;
   border-bottom-right-radius: 8px;
-  border-top-left-radius:4px;
+  border-top-left-radius: 4px;
   box-shadow: 2px 2px black;
 `;
 
@@ -35,7 +44,7 @@ const Description = styled(Typography)`
 const Styling = styled.div`
   position: relative;
   width: 100%;
-  height: 10rem;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,25 +64,84 @@ const PlayButton = styled(Button)`
 const PlayIcon = styled(PlayCircleOutlineTwoTone)``;
 
 export type ShowPreview = {
-  title: string;
+  episodeTitle: string;
+  podcastTitle: string;
   handleClick: (id: number) => void;
   description: string;
   episode: number;
+  user: object;
   file: string;
   id: number;
+  seasonIndex: number;
+  image: string;
 };
 
-export const ShowPreview = ({ title, description, episode, handleClick, id }: ShowPreview) => {
-  
+export const ShowPreview = ({
+  episodeTitle,
+  description,
+  episode,
+  handleClick,
+  id,
+  user,
+  file,
+  seasonIndex,
+  image,
+  podcastTitle
+}: ShowPreview) => {
+  const [isFav, setIsFav] = useState(false);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await supabase
+        .from("favourites")
+        .select("id")
+        .eq("episode_title", episodeTitle)
+        .eq("user_id", user?.id) 
+        .single();
+
+      setIsFav(!!data);
+    };
+
+    fetchData();
+  }, [episodeTitle, user]);
+
+  const handleFavClick = async () => {
+    setIsFav(!isFav); 
+
+    if (isFav) {
+      await supabase
+        .from("favourites")
+        .delete()
+        .match({ episode_title: episodeTitle });
+    } else {
+      await supabase.from("favourites").insert({
+        season: seasonIndex +1, 
+        podcast_title: podcastTitle, 
+        episode_title: episodeTitle,
+        podcast_img: image, 
+        podcast_file: file, 
+        user_id: user.id, 
+        episode: episode,
+      });
+    }
+  };
 
   return (
     <>
       <Card>
         <Styling>
           <Episode>Episode: {episode}</Episode>
-          <Title>{title}</Title>
+          <Title>{episodeTitle}</Title>
+          <Icon onClick={handleFavClick}>
+            {isFav ? <Favorite /> : <FavoriteBorder />}
+          </Icon>
           <Description>{description}</Description>
-          <PlayButton variant="contained" endIcon={<PlayIcon />} onClick={() => handleClick(id)}>
+          <PlayButton
+            variant="contained"
+            endIcon={<PlayIcon />}
+            onClick={() => handleClick(id)}
+          >
             Play
           </PlayButton>
         </Styling>

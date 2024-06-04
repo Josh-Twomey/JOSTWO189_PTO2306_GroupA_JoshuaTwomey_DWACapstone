@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Controls from "./components/Controls";
 import ProgressBar from "./components/SlideBar";
 import { Typography } from "@mui/material";
@@ -7,6 +7,7 @@ import { Volume } from "./components/Volume";
 import IconButton from "@mui/material/IconButton";
 import { Close } from "@mui/icons-material";
 import { stopAudio } from "../../Model";
+import { supabase } from "../Auth";
 
 
 const Icon = styled(IconButton)`
@@ -88,6 +89,31 @@ export const AudioPlayer = ({
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressBarRef = useRef<HTMLProgressElement | null>(null);
+  const [user, setUser] = useState({});
+  const [isHistory, setIsHistory] = useState(false);
+  const [history, setHistory] = useState(0);
+
+  const episodeTitle =
+    podcast.seasons[seasonIndex].episodes[episodeIndex].title;
+  const userId = user.id;
+  const timestamp = Math.floor(timeProgress);
+
+  useEffect(() => {
+      const fetchData = async () => {
+        const { data } = await supabase
+          .from("history")
+          .select("*")
+          .eq("episode_title", episodeTitle)
+          .eq("user_id", user?.id)
+          .single();
+
+        setIsHistory(!!data);
+        if (isHistory) setHistory(data.timestamp)
+      };
+      fetchData();
+    }, [episodeTitle, user, isHistory]);
+  
+  
 
   const onLoadedMetadata = () => {
     if (audioRef.current && progressBarRef.current) {
@@ -97,10 +123,45 @@ export const AudioPlayer = ({
     }
   };
 
+    useEffect(() => {
+      async function getUserData() {
+        await supabase.auth.getUser().then((value) => {
+          if (value.data?.user) {
+            setUser(value.data.user);
+          }
+        });
+      }
+      getUserData();
+    }, []);
+
+    async function updateDBTable() {
+
+      const existingEntry = await supabase
+        .from("history")
+        .select("id")
+        .eq("episode_title", episodeTitle)
+        .eq("user_id", userId)
+        .single();
+
+      if (existingEntry.data) {
+      await supabase
+          .from("history")
+          .update({ timestamp: timestamp })
+          .eq("id", existingEntry.data.id);
+
+      } else {
+       await supabase
+          .from("history")
+          .insert({ episode_title: episodeTitle, user_id:userId, timestamp: timestamp });
+      }
+    }
+
   const handleNext = () => {
+    updateDBTable();
     if(podcast.seasons[seasonIndex].episodes.length -1 > episodeIndex){
       setEpisodeIndex((prev) => prev + 1)
       if (audioRef.current) audioRef.current.currentTime = 0;
+      
     } else {
       setSeasonIndex((prev) => prev + 1)
       setEpisodeIndex(0)
@@ -116,6 +177,7 @@ export const AudioPlayer = ({
     };
 
   const handlePrev = () => {
+    updateDBTable();
     if (episodeIndex !== 0) {
       setEpisodeIndex((prev) => prev - 1);
       if (audioRef.current) audioRef.current.currentTime = 0;
@@ -127,6 +189,7 @@ export const AudioPlayer = ({
   };
 
   const handleClick = () => {
+    updateDBTable();
     stopAudio(episodeIndex,seasonIndex,podcast)
   }
   
@@ -142,9 +205,12 @@ export const AudioPlayer = ({
 
         <Controls
           {...{
+            history,
+            updateDBTable,
             audioRef,
             progressBarRef,
             duration,
+            timeProgress,
             setTimeProgress,
             handleNext,
             handlePrev,

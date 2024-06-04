@@ -1,5 +1,6 @@
 import { StoreApi, createStore as createZustandStore } from "zustand";
 import { Api, createApi, getPodcastInfo } from "../api";
+import { supabase } from "../components/Auth";
 
 type Episodes = {
   title: string;
@@ -150,6 +151,19 @@ export const stopAudio = (episode: number, season: number, show: Show) => {
     },
   });
 };
+
+
+  export async function getSupabaseData() {
+    try {
+      const { data, error } = await supabase.from("products").select("*");
+      if (error) throw error;
+      if (data !== null) {
+        return data
+      }
+    } catch (error: any) {
+      alert(error.message);
+    }
+  }
 
 const api = createApi();
 export const store = createStore(api);

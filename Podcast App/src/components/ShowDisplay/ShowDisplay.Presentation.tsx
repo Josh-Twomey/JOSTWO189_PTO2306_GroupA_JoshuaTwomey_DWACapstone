@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Global, css } from "@emotion/react";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import IconButton from "@mui/material/IconButton";
 import { Close } from "@mui/icons-material";
 import {
@@ -10,10 +10,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
 } from "@mui/material";
 import { ShowPreview } from "../ShowPreview";
 import { playAudio } from "../../Model";
+import { supabase } from "../Auth";
 
 const global = css`
   body {
@@ -97,18 +97,32 @@ const Icon = styled(IconButton)`
   }
 `;
 
+
+
 export const ShowDisplay = (props: Presentation) => {
   const { description, seasons, phase, onClose, podcast } = props;
   const [seasonIndex, setSeasonIndex] = React.useState(0);
+  const [user, setUser] = useState({});
 
-  const onClick = (episodeIndex : number) => {
-    playAudio(episodeIndex,seasonIndex,podcast)
-  }
+ const PlayButtonClick = (episodeIndex: number) => {
+   playAudio(episodeIndex, seasonIndex, podcast);
+ };
+
+  useEffect(() => {
+    async function getUserData() {
+      await supabase.auth.getUser().then((value) => {
+        if (value.data?.user) {
+          setUser(value.data.user);
+        }
+      });
+    }
+    getUserData();
+  }, []);
+
 
   const handleChange = (event: any) => {
     setSeasonIndex(event.target.value);
   };
-  
 
   return (
     <>
@@ -148,11 +162,15 @@ export const ShowDisplay = (props: Presentation) => {
                 <ShowPreview
                   key={index}
                   id={index}
+                  user={user}
                   file={item.file}
-                  title={item.title}
+                  episodeTitle={item.title}
                   description={item.description}
                   episode={item.episode}
-                  handleClick={onClick}
+                  podcastTitle={podcast.title}
+                  seasonIndex={seasonIndex}
+                  image={seasons[seasonIndex].image}
+                  handleClick={PlayButtonClick}
                 />
               );
             })}
