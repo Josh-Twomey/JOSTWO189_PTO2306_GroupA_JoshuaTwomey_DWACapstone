@@ -1,6 +1,5 @@
 import { StoreApi, createStore as createZustandStore } from "zustand";
 import { Api, createApi, getPodcastInfo } from "../api";
-import { supabase } from "../components/Auth";
 
 type Episodes = {
   title: string;
@@ -43,7 +42,8 @@ type Podcast = {
   channel: Show;
 }
 type Store = {
-  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
+  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH";
+  page: "LIST" | "CHANNEL" | "FAVOURITE"
   list: Preview[];
   show: Show;
   timestamp: number;
@@ -68,6 +68,7 @@ const createTypedStore = createZustandStore<Store>();
 export const createStore = (api : Api) : StoreApi<Store> => {
     const store = createTypedStore((set, get) => ({
       phase: "LOADING",
+      page: "LIST",
       timestamp: 0,
       sort: 0,
       podcast: {
@@ -109,7 +110,7 @@ export const createStore = (api : Api) : StoreApi<Store> => {
 
 export const closeDisplay = () => {
   return store.setState({
-    phase: "LISTING",
+    page: "LIST",
   });
 }
 
@@ -122,13 +123,19 @@ export const getShow = (id: string): StoreApi<Store> => {
     }
 
     store.setState({
-      phase: "SHOW",
+      page: "CHANNEL",
       show: data,
     });
   });
 
   return store;
 };
+
+export const FavouriteDisplay = () => {
+  store.setState({
+    page: "FAVOURITE",
+  });
+}
 
 export const playAudio = (episode: number, season: number, show: Show): StoreApi<Store> => {
   store.setState({podcast: {
@@ -151,19 +158,6 @@ export const stopAudio = (episode: number, season: number, show: Show) => {
     },
   });
 };
-
-
-  export async function getSupabaseData() {
-    try {
-      const { data, error } = await supabase.from("products").select("*");
-      if (error) throw error;
-      if (data !== null) {
-        return data
-      }
-    } catch (error: any) {
-      alert(error.message);
-    }
-  }
 
 const api = createApi();
 export const store = createStore(api);

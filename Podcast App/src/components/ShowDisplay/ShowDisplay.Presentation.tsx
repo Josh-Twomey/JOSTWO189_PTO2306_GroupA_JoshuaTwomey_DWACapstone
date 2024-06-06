@@ -46,7 +46,8 @@ type Show = {
 };
 
 export type Presentation = {
-  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
+  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH";
+  page: "LIST" | "CHANNEL" | "FAVOURITE";
   description: string;
   seasons: Seasons[];
   podcast: Show;
@@ -100,7 +101,7 @@ const Icon = styled(IconButton)`
 
 
 export const ShowDisplay = (props: Presentation) => {
-  const { description, seasons, phase, onClose, podcast } = props;
+  const { description, seasons, phase, onClose, podcast, page } = props;
   const [seasonIndex, setSeasonIndex] = React.useState(0);
   const [user, setUser] = useState({});
 
@@ -131,7 +132,7 @@ export const ShowDisplay = (props: Presentation) => {
       <Icon onClick={onClose}>
         <Close />
       </Icon>
-      {phase === "SHOW" && (
+      {page === "CHANNEL" && (
         <Wrapper>
           <Row>
             <Title>{seasons[seasonIndex].title}</Title>
@@ -163,7 +164,6 @@ export const ShowDisplay = (props: Presentation) => {
                   key={index}
                   id={index}
                   user={user}
-                  file={item.file}
                   episodeTitle={item.title}
                   description={item.description}
                   episode={item.episode}

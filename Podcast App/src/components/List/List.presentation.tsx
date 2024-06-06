@@ -29,7 +29,8 @@ const StyledSkeleton = styled(Skeleton)`
 `;
 
 export type Presentation = {
-  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW";
+  phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH";
+  page: "LIST" | "CHANNEL" | "FAVOURITE";
   podcasts: Preview[];
   filter: string;
   sort: number;
@@ -53,7 +54,7 @@ const Wrapper = styled.div`
 `;
 
 export const Presentation = (props: Presentation) => {
-  const { podcasts, phase, filter, sort, configuration, toggleFilter, onSelect } = props;
+  const { podcasts, phase, filter, sort, configuration, toggleFilter, onSelect, page } = props;
 
   const podcastSort = (podcast: Preview[], sort: number) => {
     switch (sort) {
@@ -86,47 +87,53 @@ export const Presentation = (props: Presentation) => {
       <Wrapper>
         <CssBaseline />
         <Global styles={global} />
-
         {phase === "SEARCH" && configuration}
-        <Row>
-          <Button
-            disabled={phase !== "LISTING"}
-            variant="contained"
-            onClick={toggleFilter}
-          >
-            Filter List
-          </Button>
-        </Row>
-        <Grid>
-          {phase === "LISTING" &&
-            podcastSort(podcasts,sort)
-              .filter((item) => {
-                if (filter.trim() === "") return true;
-                return item.title.toLowerCase().includes(filter.toLowerCase());
-              })
-              .map((innerProps) => {
-                const clickHandler = () => onSelect(parseInt(innerProps.id));
-                return (
-                  <div onClick={clickHandler} key={innerProps.id}>
-                    <Preview {...innerProps} />
-                  </div>
-                );
-              })}
+        {page === "LIST" && (
+          <>
+            <Row>
+              <Button
+                disabled={phase !== "LISTING"}
+                variant="contained"
+                onClick={toggleFilter}
+              >
+                Filter List
+              </Button>
+            </Row>
+            <Grid>
+              {phase === "LISTING" &&
+                podcastSort(podcasts, sort)
+                  .filter((item) => {
+                    if (filter.trim() === "") return true;
+                    return item.title
+                      .toLowerCase()
+                      .includes(filter.toLowerCase());
+                  })
+                  .map((innerProps) => {
+                    const clickHandler = () =>
+                      onSelect(parseInt(innerProps.id));
+                    return (
+                      <div onClick={clickHandler} key={innerProps.id}>
+                        <Preview {...innerProps} />
+                      </div>
+                    );
+                  })}
 
-          {phase === "LOADING" && (
-            <>
-              {new Array(20).fill(undefined).map((_, index) => (
-                <StyledSkeleton variant="rectangular" key={index} />
-              ))}
-            </>
-          )}
+              {phase === "LOADING" && (
+                <>
+                  {new Array(20).fill(undefined).map((_, index) => (
+                    <StyledSkeleton variant="rectangular" key={index} />
+                  ))}
+                </>
+              )}
 
-          {phase === "ERROR" && (
-            <Alert severity="error">
-              Something went wrong. Please try again later
-            </Alert>
-          )}
-        </Grid>
+              {phase === "ERROR" && (
+                <Alert severity="error">
+                  Something went wrong. Please try again later
+                </Alert>
+              )}
+            </Grid>
+          </>
+        )}
       </Wrapper>
     </>
   );

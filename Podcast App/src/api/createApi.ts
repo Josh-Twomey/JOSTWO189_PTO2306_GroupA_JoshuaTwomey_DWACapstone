@@ -45,23 +45,6 @@ export type API = {
   >;
 };
 
-const episodeSchema = z
-  .object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    episode: z.number().optional(),
-    file: z.string().optional(),
-  })
-  .optional();
-
-const seasonSchema = z
-  .object({
-    season: z.number().optional(),
-    title: z.string().optional(),
-    image: z.string().url().optional(),
-    episodes: z.array(episodeSchema).optional(),
-  })
-  .optional();
 
 const zodgetPodcastList = z.array(
   z.object({
@@ -75,15 +58,7 @@ const zodgetPodcastList = z.array(
   })
 );
 
-const zodgetPodcastInfo = z.object({
-  id: z.string().optional(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  seasons: z.array(seasonSchema).optional(),
-  image: z.string().optional(),
-  genres: z.array(z.string()).optional(),
-  updated: z.string().optional(),
-});
+
 
 
 
@@ -126,7 +101,6 @@ export const getPodcastInfo: API["getPodcastInfo"] = (id) => {
       }
       return response.json();
     })
-    .then((dataCheck) => zodgetPodcastInfo.parse(dataCheck))
     .then((data) => data)
     .catch((err) => {
       console.error(err);

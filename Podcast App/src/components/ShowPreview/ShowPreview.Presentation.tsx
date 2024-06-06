@@ -70,7 +70,6 @@ export type ShowPreview = {
   description: string;
   episode: number;
   user: object;
-  file: string;
   id: number;
   seasonIndex: number;
   image: string;
@@ -83,7 +82,6 @@ export const ShowPreview = ({
   handleClick,
   id,
   user,
-  file,
   seasonIndex,
   image,
   podcastTitle
@@ -120,8 +118,8 @@ export const ShowPreview = ({
         podcast_title: podcastTitle, 
         episode_title: episodeTitle,
         podcast_img: image, 
-        podcast_file: file, 
         user_id: user.id, 
+        description: description,
         episode: episode,
       });
     }

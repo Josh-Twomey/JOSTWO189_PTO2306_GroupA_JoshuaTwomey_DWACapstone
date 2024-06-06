@@ -20,9 +20,12 @@ export const Single = () => {
   
   const podcast = useStore(store, (state) => state.show);
   const phase = useStore(store, (state) => state.phase);
+  const page = useStore(store, (state) => state.page)
+
   return (
     <ShowDisplay
       phase={phase}
+      page={page}
       description={podcast.description}
       seasons={podcast.seasons}
       podcast={podcast}

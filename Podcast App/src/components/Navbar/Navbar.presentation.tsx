@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { FavouriteDisplay } from "../../Model/store"
 import { Button, ButtonBase, Typography} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../Auth";
@@ -35,19 +35,7 @@ const Menu = styled(ButtonBase)`
 
 
 export const Navbar = () => {
-  const [user,setUser] = useState({})
   const navigate = useNavigate()
-
-  useEffect(() => {
-    async function getUserData() {
-      await supabase.auth.getUser().then((value) => {
-        if (value.data?.user) {
-          setUser(value.data.user)
-        }
-      })
-    }
-    getUserData()
-  }, [])
 
   async function signOutUser() {
     try {
@@ -58,11 +46,16 @@ export const Navbar = () => {
     }
     
   } 
+
+  const handleFavourites = () => {
+    navigate("/Favourites")
+    FavouriteDisplay()
+  }
   return (
     <>
       <Container>
         <Logo variant="h4">Podcast Now</Logo>
-        <Menu>Favourites</Menu>
+        <Menu onClick={handleFavourites}>Favourites</Menu>
         <Button onClick={() => signOutUser()}>Sign Out</Button>
       </Container>
     </>

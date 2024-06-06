@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import { PlayCircleOutlineTwoTone } from "@mui/icons-material";
 import { Paper, Typography, Button } from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { supabase } from "../Auth";
 
 const Title = styled(Typography)`
   font-size: 1.5rem;
@@ -26,7 +27,7 @@ const Card = styled(Paper)`
 `;
 
 const Description = styled(Typography)`
-  padding: 0 1rem;
+  padding:0.25rem 1rem;
   font-size: 12px;
 `;
 
@@ -46,44 +47,89 @@ const Image = styled.img`
   border-radius: 10px;
 `;
 
-const PlayButton = styled(Button)`
-  padding: 0.5rem;
-  margin: 1rem;
-  background-color: grey;
-  :hover {
-    background-color: #dcdcdc;
-    color: black;
-  }
-`;
-const PlayIcon = styled(PlayCircleOutlineTwoTone)``;
+const DateTime = styled(Typography)`
+  font-size: 12px;
+  font-weight: 500;
+  padding-bottom: 1rem;
+`
+const Positioning = styled.div`
+  position: relative;
+  top:10px;
+  left: 43%;
+`
 
 export type FavouritesCard = {
   title: string;
   image: string;
   episodetitle: string;
-  handleClick: (id: number) => void;
   description: string;
   episode: number;
   season: number;
-  file: string;
-  id: number;
+  created: string;
+  getFavourites: () => Promise<void>;
 };
 
-export const FavouritesCard = ({ title, description, episode, image, season, episodetitle, handleClick, id }: FavouritesCard) => {
+
+
+ const monthNames = [
+   "January",
+   "February",
+   "March",
+   "April",
+   "May",
+   "June",
+   "July",
+   "August",
+   "September",
+   "October",
+   "November",
+   "December",
+ ];
+
+export const FavouritesCard = ({ title, description, episode, image, season, episodetitle, created, getFavourites}: FavouritesCard) => {
+  const createdDate = new Date(created)
+  const year = createdDate.getFullYear()
+  const month = createdDate.getMonth()
+  const day = createdDate.getDate()
+  const hour = createdDate.getHours()
+  const minutes = createdDate.getMinutes()
   
+
+  const removehandler = (episodetitle: string) => {
+        async function removedata(episodetitle: string) {
+          try {
+            const { data, error } = await supabase
+              .from("favourites")
+              .delete()
+              .eq("episode_title", episodetitle);
+
+            if (error) throw error;
+          } catch (error: any) {
+            alert(error.message);
+          }
+        }
+
+        removedata(episodetitle).then(() => getFavourites());
+        
+      };
   
   return (
     <>
       <Card>
         <Styling>
+          <Positioning>
+            <Button onClick={() => {removehandler(episodetitle)}} endIcon={<Close />}>Remove</Button>
+          </Positioning>
           <Title>{title}</Title>
-          <Image src={image}/>
+          <Image src={image} />
           <EpisodeTitle>{episodetitle}</EpisodeTitle>
-          <Details>Season:{season}&nbsp;Episode:{episode}</Details>
+          <Details>
+            Season:{season}&nbsp;Episode:{episode}
+          </Details>
           <Description>{description}</Description>
-          <PlayButton variant="contained" endIcon={<PlayIcon />} onClick={() => handleClick(id)}>
-            Play
-          </PlayButton>
+          <DateTime>
+            Added: {day} {monthNames[month]} {year} {hour}:{minutes}
+          </DateTime>
         </Styling>
       </Card>
     </>
