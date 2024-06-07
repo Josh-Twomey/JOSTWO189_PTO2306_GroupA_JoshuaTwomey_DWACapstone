@@ -7,6 +7,7 @@ import {
 } from "@mui/icons-material";
 import { IconButton, Typography, Paper, Button } from "@mui/material";
 import { supabase } from "../Auth"; // Assuming Auth.js holds Supabase instance
+import { number } from "zod";
 
 const Title = styled(Typography)`
   font-size: 1rem;
@@ -63,6 +64,28 @@ const PlayButton = styled(Button)`
 `;
 const PlayIcon = styled(PlayCircleOutlineTwoTone)``;
 
+
+type HistoryDB = {
+  id: string;
+  user_id: string;
+  episode_title: string;
+  timestamp: number;
+  created: string;
+}[];
+
+type FavDB = {
+  id: string;
+  user_id: string;
+  episode_title: string;
+  created: string;
+  podcast_title: string;
+  episode: number;
+  season: number;
+  Fav: boolean;
+  podcast_img: string;
+  description: string;
+}[];
+
 export type ShowPreview = {
   episodeTitle: string;
   podcastTitle: string;
@@ -84,44 +107,69 @@ export const ShowPreview = ({
   user,
   seasonIndex,
   image,
-  podcastTitle
+  podcastTitle,
 }: ShowPreview) => {
   const [isFav, setIsFav] = useState(false);
-
+  const [time, setTime] = useState(0); 
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await supabase
-        .from("favourites")
-        .select("id")
-        .eq("episode_title", episodeTitle)
-        .eq("user_id", user?.id) 
-        .single();
+      try {
+        const historyResponse = await supabase
+          .from("history")
+          .select("*")
+          .eq("user_id", user?.id);
 
-      setIsFav(!!data);
+        const favsResponse = await supabase
+          .from("favourites")
+          .select("*")
+          .eq("user_id", user?.id);
+
+        if (historyResponse.error || favsResponse.error) {
+          throw historyResponse.error || favsResponse.error;
+        }
+
+        const matchingHistory = historyResponse.data?.find(
+          (data) => data.episode_title === episodeTitle
+        );
+        if (matchingHistory) {
+          setTime(matchingHistory.timestamp);
+        }
+
+        const matchingFav = favsResponse.data?.find(
+          (data) => data.episode_title === episodeTitle
+        );
+        setIsFav(matchingFav?.Fav || false); // Set default to false if not found
+      } catch (error: any) {
+        alert(error.message);
+      }
     };
 
     fetchData();
-  }, [episodeTitle, user]);
+  }, [user?.id, episodeTitle]); // Update on user or episode title change
 
   const handleFavClick = async () => {
-    setIsFav(!isFav); 
-
-    if (isFav) {
-      await supabase
-        .from("favourites")
-        .delete()
-        .match({ episode_title: episodeTitle });
-    } else {
-      await supabase.from("favourites").insert({
-        season: seasonIndex +1, 
-        podcast_title: podcastTitle, 
-        episode_title: episodeTitle,
-        podcast_img: image, 
-        user_id: user.id, 
-        description: description,
-        episode: episode,
-      });
+    setIsFav(!isFav);
+    try {
+      if (isFav) {
+        await supabase
+          .from("favourites")
+          .delete()
+          .match({ episode_title: episodeTitle });
+      } else {
+        await supabase.from("favourites").insert({
+          season: seasonIndex + 1,
+          podcast_title: podcastTitle,
+          episode_title: episodeTitle,
+          podcast_img: image,
+          user_id: user.id,
+          description,
+          episode,
+          Fav: true,
+        });
+      }
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
@@ -142,6 +190,7 @@ export const ShowPreview = ({
           >
             Play
           </PlayButton>
+          <Typography>{time === 42 ? `Completed Episode` : `Watched(seconds): ${time}`}</Typography>
         </Styling>
       </Card>
     </>

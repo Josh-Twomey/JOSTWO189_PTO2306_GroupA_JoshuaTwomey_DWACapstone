@@ -20,11 +20,13 @@ const list: Presentation["podcasts"] = new Array(40)
 
 export default meta;
 
-const props: Pick<Presentation, "configuration" | "toggleFilter" | "filter" | "onSelect"> = {
+const props: Pick<Presentation, "configuration" | "toggleFilter" | "filter" | "onSelect"| "page" | "sort"> = {
   toggleFilter: () => console.log("toggleFilter"),
   configuration: <div>Placeholder</div>,
   filter: "",
-  onSelect: (value) => console.log(value)
+  onSelect: (value) => console.log(value),
+  page: "LIST",
+  sort: 0,
 };
 export const Loading = () => <Presentation podcasts={[]} phase="LOADING" {...props} />;
 export const Listing = () => <Presentation podcasts={list} phase="LISTING" {...props} />;

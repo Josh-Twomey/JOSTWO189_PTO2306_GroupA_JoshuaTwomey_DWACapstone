@@ -4,7 +4,7 @@ import { genreNames } from "../../api";
 
 const Card = styled(Paper)<{ as: string }>`
   margin: 1rem 0;
-  min-height: 20rem;
+  min-height: 26rem;
   max-width: 20rem;
   border-radius: 10px;
 `;
@@ -12,7 +12,7 @@ const Card = styled(Paper)<{ as: string }>`
 const StyledButtonBase = styled(ButtonBase)`
   padding: 1rem;
   width: 100%;
-  min-height: 20rem;
+  min-height: 26rem;
   display:flex;
   flex-direction: column;
   border-radius:10px;
@@ -28,6 +28,22 @@ const Image = styled.img`
 const ShowInfo = styled.div`
   position: absolute;
   top: 200px;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Title = styled(Typography)`
+  max-width: 95%;
+  margin-left: 5px;
+  font-weight: 600;
+  overflow: hidden;
+  display: -webkit-box;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 `;
 
 const MoreInfo = styled.div`
@@ -65,9 +81,9 @@ export const Preview = ({title, seasons, image, genres, updated }: Preview) => {
         <StyledButtonBase>
           <Image src={image} />
           <ShowInfo>
-            <Typography variant="h6">
-              <strong>{title}</strong>
-            </Typography>
+            <Title variant="h6">
+              {title}
+            </Title>
             <MoreInfo>
               <Line variant="body2">
                 {seasons} Seasons

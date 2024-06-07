@@ -42,6 +42,7 @@ type Presentation = {
   podcast: Show;
   episode: number;
   season: number;
+  isAudioPlaying: "PLAYING" | "NULL";
 };
 
 const Card = styled.div`
@@ -80,6 +81,7 @@ export const AudioPlayer = ({
   podcast,
   episode,
   season,
+  isAudioPlaying
 }: Presentation) => {
   
   const [episodeIndex, setEpisodeIndex] = useState(episode)
@@ -92,11 +94,17 @@ export const AudioPlayer = ({
   const [user, setUser] = useState({});
   const [isHistory, setIsHistory] = useState(false);
   const [history, setHistory] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const episodeTitle =
     podcast.seasons[seasonIndex].episodes[episodeIndex].title;
   const userId = user.id;
   const timestamp = Math.floor(timeProgress);
+
+  useEffect(() => {
+    setEpisodeIndex(episode);
+    setSeasonIndex(season);
+  }, [episode, season]); 
 
   useEffect(() => {
       const fetchData = async () => {
@@ -112,6 +120,19 @@ export const AudioPlayer = ({
       };
       fetchData();
     }, [episodeTitle, user, isHistory]);
+
+    const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      if (isAudioPlaying === "PLAYING") {
+        updateDBTable();
+        alert("Are you sure you want to leave this page?");
+    }};
+
+    useEffect(() => {
+      window.addEventListener("beforeunload", beforeUnloadHandler);
+      return () =>
+        window.removeEventListener("beforeunload", beforeUnloadHandler);
+    }, []);
   
   
 
@@ -152,7 +173,7 @@ export const AudioPlayer = ({
       } else {
        await supabase
           .from("history")
-          .insert({ episode_title: episodeTitle, user_id:userId, timestamp: timestamp });
+          .insert({ episode_title: episodeTitle, user_id:userId, timestamp: timestamp, season: seasonIndex, episode: episodeIndex, podcast: podcast });
       }
     }
 
@@ -167,6 +188,7 @@ export const AudioPlayer = ({
       setEpisodeIndex(0)
       if(audioRef.current) audioRef.current.currentTime = 0
     }
+    if (isPlaying) setIsPlaying((prev) => !prev);
   };
 
     const handleEndUpdate = () => {
@@ -186,6 +208,7 @@ export const AudioPlayer = ({
       setEpisodeIndex(podcast.seasons[seasonIndex].episodes.length - 1);
       if (audioRef.current) audioRef.current.currentTime = 0;
     }
+    if (isPlaying) setIsPlaying((prev) => !prev);
   };
 
   const handleClick = () => {
@@ -214,6 +237,8 @@ export const AudioPlayer = ({
             setTimeProgress,
             handleNext,
             handlePrev,
+            isPlaying,
+            setIsPlaying
           }}
         />
 

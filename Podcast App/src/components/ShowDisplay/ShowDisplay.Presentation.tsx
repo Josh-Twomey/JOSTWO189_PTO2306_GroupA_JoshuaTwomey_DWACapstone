@@ -4,6 +4,7 @@ import React, {useState, useEffect} from "react";
 import IconButton from "@mui/material/IconButton";
 import { Close } from "@mui/icons-material";
 import {
+  CircularProgress,
   CssBaseline,
   Typography,
   FormControl,
@@ -77,6 +78,12 @@ const Image = styled.img`
 const Title = styled(Typography)`
   padding: 1rem;
   font-size: 40px;
+  font-weight: 650;
+`;
+
+const Subtitle = styled(Typography)`
+  padding-bottom: 1rem;
+  font-size: 34px;
   font-weight: 600;
 `;
 
@@ -98,12 +105,29 @@ const Icon = styled(IconButton)`
   }
 `;
 
+const Episode = styled(Typography)`
+  font-size: 18px;
+  font-weight: 550;
+
+`
+
+const Positioning = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width:100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+`
+
 
 
 export const ShowDisplay = (props: Presentation) => {
-  const { description, seasons, phase, onClose, podcast, page } = props;
+  const { description, seasons, onClose, podcast, page, phase } = props;
   const [seasonIndex, setSeasonIndex] = React.useState(0);
   const [user, setUser] = useState({});
+
 
  const PlayButtonClick = (episodeIndex: number) => {
    playAudio(episodeIndex, seasonIndex, podcast);
@@ -120,6 +144,8 @@ export const ShowDisplay = (props: Presentation) => {
     getUserData();
   }, []);
 
+    
+
 
   const handleChange = (event: any) => {
     setSeasonIndex(event.target.value);
@@ -129,54 +155,69 @@ export const ShowDisplay = (props: Presentation) => {
     <>
       <CssBaseline />
       <Global styles={global} />
-      <Icon onClick={onClose}>
-        <Close />
-      </Icon>
+
       {page === "CHANNEL" && (
-        <Wrapper>
-          <Row>
-            <Title>{seasons[seasonIndex].title}</Title>
-            <Image src={seasons[seasonIndex].image} />
-            <Description>{description}</Description>
+        <>
+          {phase === "LOADING" && (
+              <Positioning>
+                <CircularProgress />
+                <Typography variant="h3">Loading...</Typography>
+              </Positioning>
+          )}
+          {phase === "LISTING" && (
+            <>
+              <Icon onClick={onClose}>
+                <Close />
+              </Icon>
+              <Wrapper>
+                <Row>
+                  <Title>{podcast.title}</Title>
+                  <Subtitle>{seasons[seasonIndex].title}</Subtitle>
+                  <Image src={seasons[seasonIndex].image} />
+                  <Description>{description}</Description>
 
-            <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="select-helper-label">Season</InputLabel>
-              <Select
-                labelId="select-helper-label"
-                id="select-helper"
-                value={seasonIndex}
-                label="Season"
-                onChange={handleChange}
-              >
-                {seasons.map((item, index) => {
-                  return (
-                    <MenuItem key={index} value={index}>
-                      {item.season}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-
-            {seasons[seasonIndex].episodes.map((item, index) => {
-              return (
-                <ShowPreview
-                  key={index}
-                  id={index}
-                  user={user}
-                  episodeTitle={item.title}
-                  description={item.description}
-                  episode={item.episode}
-                  podcastTitle={podcast.title}
-                  seasonIndex={seasonIndex}
-                  image={seasons[seasonIndex].image}
-                  handleClick={PlayButtonClick}
-                />
-              );
-            })}
-          </Row>
-        </Wrapper>
+                  <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id="select-helper-label">Season</InputLabel>
+                    <Select
+                      labelId="select-helper-label"
+                      id="select-helper"
+                      value={seasonIndex}
+                      label="Season"
+                      onChange={handleChange}
+                    >
+                      {seasons.map((item, index) => {
+                        return (
+                          <MenuItem key={index} value={index}>
+                            {item.season}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                  <Episode>
+                    Episodes: {seasons[seasonIndex].episodes.length}
+                  </Episode>
+                  {seasons[seasonIndex].episodes.map((item, index) => {
+                    return (
+                      <ShowPreview
+                        key={index}
+                        id={index}
+                        user={user}
+                        episodeTitle={item.title}
+                        description={item.description}
+                        episode={item.episode}
+                        podcastTitle={podcast.title}
+                        seasonIndex={seasonIndex}
+                        image={seasons[seasonIndex].image}
+                        handleClick={PlayButtonClick}
+                      />
+                    );
+                  })}
+                </Row>
+              </Wrapper>
+            </>
+          )}
+        </>
       )}
     </>
-  );
-};
+  )};

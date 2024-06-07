@@ -8,6 +8,9 @@ import {
   Alert,
 } from "@mui/material";
 import { Navbar } from "../Navbar";
+import { useState, useEffect } from "react";
+import { supabase } from "../Auth";
+import { playAudio } from "../../Model";
 
 const global = css`
   body {
@@ -16,8 +19,20 @@ const global = css`
 `;
 
 const Grid = styled.div`
-display: grid;
-grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  display: grid;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 `;
 
 
@@ -47,6 +62,17 @@ const Row = styled.div`
 `;
 
 const Wrapper = styled.div`
+  @media (max-width: 768px) {
+    max-width: 20rem;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    max-width: 45rem;
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 67rem;
+  }
   margin: 0 auto;
   padding: 1rem;
   max-width: 67rem;
@@ -55,6 +81,43 @@ const Wrapper = styled.div`
 
 export const Presentation = (props: Presentation) => {
   const { podcasts, phase, filter, sort, configuration, toggleFilter, onSelect, page } = props;
+  const [prevPod,setPrevPod] = useState<any>([])
+  const [user, setUser] = useState({});
+   
+  useEffect(() => {
+      async function getUserData() {
+          await supabase.auth.getUser().then((value) => {
+            if (value.data?.user) {
+                setUser(value.data.user.id);
+              }
+            })
+          }
+
+          getUserData();
+        
+     const fetchData = async () => {
+       const { data } = await supabase
+         .from("history")
+         .select("*")
+         .eq("user_id", user)
+         .order("created", { ascending: false })
+         .limit(1);
+
+       setPrevPod(data);
+     };
+     fetchData();
+   }, [user, prevPod]);
+
+   const prevPodPlay = () => {
+    if (prevPod.length < 1) {
+      alert("You have no history for a previously played podcast")
+      return
+    } else {
+      playAudio(prevPod[0].episode,prevPod[0].season,prevPod[0].podcast)
+    }
+   }
+   
+  
 
   const podcastSort = (podcast: Preview[], sort: number) => {
     switch (sort) {
@@ -98,6 +161,7 @@ export const Presentation = (props: Presentation) => {
               >
                 Filter List
               </Button>
+              <Button disabled={phase !== "LISTING"} onClick={prevPodPlay}>Play Last Podcast</Button>
             </Row>
             <Grid>
               {phase === "LISTING" &&

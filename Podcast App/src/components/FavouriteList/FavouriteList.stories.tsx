@@ -1,26 +1,15 @@
-import { StoryObj, Meta } from "@storybook/react";
-import { ShowDisplay, Seasons } from "./FavouriteList.Presentation";
+import { StoryObj } from "@storybook/react";
+import { FavouriteList } from "./FavouriteList.Presentation";
 
-type Presentation = {
-  phase: "SHOW";
-  id: string;
-  title: string;
-  description: string;
-  seasons: Seasons[];
-  image: string;
-  genres: string[];
-  updated: string;
-  onClose: () => void;
-};
 
-const meta: Meta<Presentation> = {
-  title: "components/ShowDisplay",
-  component: ShowDisplay,
+const meta = {
+  title: "components/FavouriteList",
+  component: FavouriteList,
 };
 
 export default meta;
 
-export const Basic: StoryObj<Presentation> = {
+export const Basic: StoryObj = {
   args: {
     id: "8291",
     title: "Dirty John",
@@ -196,6 +185,5 @@ export const Basic: StoryObj<Presentation> = {
       "https://content.production.cdn.art19.com/images/f5/cf/d8/37/f5cfd837-6c97-4422-a573-4ea06f2b2a13/129e1aa2908a3f47b8e2f28494ea5067ac6f96b6756e3c80f0ddcced5a43875af40077d78694f229a1cd9d5da05aba1cc6251b903e82e09ff73e05e861d453f5.png",
     genres: ["All", "News", "True Crime and Investigative Journalism"],
     updated: "2018-11-21T08:05:00.000Z",
-    phase: "SHOW",
   },
 };

@@ -1,6 +1,5 @@
 import { useStore } from "zustand";
-import { store } from "../../Model";
-import { getShow, closeDisplay } from "../../Model";
+import { store, getShow, closeDisplay, setLoadingChannel } from "../../Model";
 import { useNavigate, useParams } from "react-router-dom";
 import { ShowDisplay } from "./ShowDisplay.Presentation";
 import { useEffect } from "react";
@@ -13,7 +12,10 @@ export const Single = () => {
   if (!id) throw new Error("ID expected")
   useEffect(() => {
     async function fetchData(id : string) {
-      getShow(id);
+      setLoadingChannel()
+      
+        getShow(id);
+      
     }
     fetchData(id);
   }, [id]);
@@ -21,7 +23,7 @@ export const Single = () => {
   const podcast = useStore(store, (state) => state.show);
   const phase = useStore(store, (state) => state.phase);
   const page = useStore(store, (state) => state.page)
-
+  console.log(phase)
   return (
     <ShowDisplay
       phase={phase}

@@ -17,30 +17,6 @@ const global = css`
   }
 `;
 
-type Episodes = {
-  title: string;
-  description: string;
-  episode: number;
-  file: string;
-};
-
-export type Seasons = {
-  season: number;
-  title: string;
-  image: string;
-  episodes: Episodes[];
-};
-
-type Show = {
-  id: string;
-  title: string;
-  description: string;
-  seasons: Seasons[];
-  image: string;
-  genres: string[];
-  updated: string;
-};
-
 export type Presentation = {
   phase: "LOADING" | "LISTING" | "ERROR" | "SEARCH" | "SHOW" | "FAVOURITE";
   favs: any[];
@@ -105,7 +81,7 @@ export const FavouriteList = (props: Presentation) => {
     async function getUserData() {
       await supabase.auth.getUser().then((value) => {
         if (value.data?.user) {
-          setUser(value.data.user);
+          setUser(value.data.user.id);
         }
       });
     }
@@ -161,6 +137,9 @@ export const FavouriteList = (props: Presentation) => {
               .filter((item) => {
                 if (filter.trim() === "") return true;
                 return item.podcast_title.toLowerCase().includes(filter.toLowerCase());
+              })
+              .filter((item) => {
+                if (user === item.user_id) return item
               })
               .map((item) => (
                 <FavouritesCard

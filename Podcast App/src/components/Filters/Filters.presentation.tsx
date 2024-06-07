@@ -29,6 +29,7 @@ const StyledContent = styled.div`
   width: 100%;
   max-width: 20rem;
 `;
+
 const response = z.object({
   search: z
     .string()

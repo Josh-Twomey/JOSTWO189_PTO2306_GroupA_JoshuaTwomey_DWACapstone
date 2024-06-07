@@ -19,7 +19,7 @@ export const App = () => {
           <Route path="/podcast/:id" element={<Single />} />
           <Route path="/list" element={<List configuration={<Filters />} />} />
           <Route
-            path="/Favourites"
+            path="/Favourites/:id"
             element={<SingleFav configuration={<Filters />} />}
           />
         </Routes>

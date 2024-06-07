@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import IconButton from "@mui/material/IconButton";
 import styled from "@emotion/styled";
 import {
@@ -24,13 +24,16 @@ type Controls = {
   handlePrev: () => void;
   updateDBTable: () => void;
   history: number;
+  isPlaying: boolean;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const Controls = ({ audioRef, progressBarRef, duration, setTimeProgress, updateDBTable, handleNext, history, handlePrev } : Controls) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+const Controls = ({ audioRef, progressBarRef, duration, setTimeProgress, updateDBTable, handleNext, isPlaying, setIsPlaying, history, handlePrev } : Controls) => {
+  
 
   useEffect(() => {
     if (audioRef.current) {
+      if (history === 42) history = 0
       audioRef.current.currentTime += history;
     }
   }, [history,audioRef]);

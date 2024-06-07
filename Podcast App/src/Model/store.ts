@@ -114,7 +114,16 @@ export const closeDisplay = () => {
   });
 }
 
+export const setLoadingChannel = () => {
+  store.setState({
+    page: "CHANNEL",
+    phase: "LOADING",
+  });
+}
+
 export const getShow = (id: string): StoreApi<Store> => {
+  
+
   getPodcastInfo(id).then((data) => {
     if (data instanceof Error) {
       return store.setState({
@@ -124,6 +133,7 @@ export const getShow = (id: string): StoreApi<Store> => {
 
     store.setState({
       page: "CHANNEL",
+      phase: "LISTING",
       show: data,
     });
   });
@@ -135,6 +145,7 @@ export const FavouriteDisplay = () => {
   store.setState({
     page: "FAVOURITE",
   });
+  return store
 }
 
 export const playAudio = (episode: number, season: number, show: Show): StoreApi<Store> => {
