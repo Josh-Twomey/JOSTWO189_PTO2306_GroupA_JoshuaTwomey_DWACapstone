@@ -9,7 +9,6 @@ import { Close } from "@mui/icons-material";
 import { stopAudio } from "../../Model";
 import { supabase } from "../Auth";
 
-
 const Icon = styled(IconButton)`
   color: #dcdcdc;
 `;
@@ -81,12 +80,11 @@ export const AudioPlayer = ({
   podcast,
   episode,
   season,
-  isAudioPlaying
+  isAudioPlaying,
 }: Presentation) => {
-  
-  const [episodeIndex, setEpisodeIndex] = useState(episode)
+  const [episodeIndex, setEpisodeIndex] = useState(episode);
   const [seasonIndex, setSeasonIndex] = useState(season);
-  const currentTrack= podcast.seasons[seasonIndex].episodes[episodeIndex].file;
+  const currentTrack = podcast.seasons[seasonIndex].episodes[episodeIndex].file;
   const [timeProgress, setTimeProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -98,43 +96,42 @@ export const AudioPlayer = ({
 
   const episodeTitle =
     podcast.seasons[seasonIndex].episodes[episodeIndex].title;
-  const userId = user.id;
+  const userId = user;
   const timestamp = Math.floor(timeProgress);
 
   useEffect(() => {
     setEpisodeIndex(episode);
     setSeasonIndex(season);
-  }, [episode, season]); 
+  }, [episode, season]);
 
   useEffect(() => {
-      const fetchData = async () => {
-        const { data } = await supabase
-          .from("history")
-          .select("*")
-          .eq("episode_title", episodeTitle)
-          .eq("user_id", user?.id)
-          .single();
+    const fetchData = async () => {
+      const { data } = await supabase
+        .from("history")
+        .select("*")
+        .eq("episode_title", episodeTitle)
+        .eq("user_id", user)
+        .single();
 
-        setIsHistory(!!data);
-        if (isHistory) setHistory(data.timestamp)
-      };
-      fetchData();
-    }, [episodeTitle, user, isHistory]);
+      setIsHistory(!!data);
+      if (isHistory) setHistory(data.timestamp);
+    };
+    fetchData();
+  }, [episodeTitle, user, isHistory]);
 
-    const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      if (isAudioPlaying === "PLAYING") {
-        updateDBTable();
-        alert("Are you sure you want to leave this page?");
-    }};
+  const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    if (isAudioPlaying === "PLAYING") {
+      updateDBTable();
+      alert("Are you sure you want to leave this page?");
+    }
+  };
 
-    useEffect(() => {
-      window.addEventListener("beforeunload", beforeUnloadHandler);
-      return () =>
-        window.removeEventListener("beforeunload", beforeUnloadHandler);
-    }, []);
-  
-  
+  useEffect(() => {
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+    return () =>
+      window.removeEventListener("beforeunload", beforeUnloadHandler);
+  }, []);
 
   const onLoadedMetadata = () => {
     if (audioRef.current && progressBarRef.current) {
@@ -144,59 +141,63 @@ export const AudioPlayer = ({
     }
   };
 
-    useEffect(() => {
-      async function getUserData() {
-        await supabase.auth.getUser().then((value) => {
-          if (value.data?.user) {
-            setUser(value.data.user);
-          }
-        });
-      }
-      getUserData();
-    }, []);
-
-    async function updateDBTable() {
-
-      const existingEntry = await supabase
-        .from("history")
-        .select("id")
-        .eq("episode_title", episodeTitle)
-        .eq("user_id", userId)
-        .single();
-
-      if (existingEntry.data) {
-      await supabase
-          .from("history")
-          .update({ timestamp: timestamp })
-          .eq("id", existingEntry.data.id);
-
-      } else {
-       await supabase
-          .from("history")
-          .insert({ episode_title: episodeTitle, user_id:userId, timestamp: timestamp, season: seasonIndex, episode: episodeIndex, podcast: podcast });
-      }
+  useEffect(() => {
+    async function getUserData() {
+      await supabase.auth.getUser().then((value) => {
+        if (value.data?.user) {
+          setUser(value.data.user.id);
+        }
+      });
     }
+    getUserData();
+  }, []);
+
+  async function updateDBTable() {
+    const existingEntry = await supabase
+      .from("history")
+      .select("id")
+      .eq("episode_title", episodeTitle)
+      .eq("user_id", userId)
+      .single();
+
+    if (existingEntry.data) {
+      await supabase
+        .from("history")
+        .update({ timestamp: timestamp })
+        .eq("id", existingEntry.data.id);
+    } else {
+      await supabase
+        .from("history")
+        .insert({
+          episode_title: episodeTitle,
+          user_id: userId,
+          timestamp: timestamp,
+          season: seasonIndex,
+          episode: episodeIndex,
+          podcast: podcast,
+        });
+    }
+  }
 
   const handleNext = () => {
     updateDBTable();
-    if(podcast.seasons[seasonIndex].episodes.length -1 > episodeIndex){
-      setEpisodeIndex((prev) => prev + 1)
+    if (podcast.seasons[seasonIndex].episodes.length - 1 > episodeIndex) {
+      setEpisodeIndex((prev) => prev + 1);
       if (audioRef.current) audioRef.current.currentTime = 0;
-      
     } else {
-      setSeasonIndex((prev) => prev + 1)
-      setEpisodeIndex(0)
-      if(audioRef.current) audioRef.current.currentTime = 0
+      setSeasonIndex((prev) => prev + 1);
+      setEpisodeIndex(0);
+      if (audioRef.current) audioRef.current.currentTime = 0;
     }
     if (isPlaying) setIsPlaying((prev) => !prev);
   };
 
-    const handleEndUpdate = () => {
-      if (audioRef.current) 
+  const handleEndUpdate = () => {
+    if (audioRef.current)
       if (audioRef.current.currentTime > duration - 0.1) {
         handleNext();
       }
-    };
+  };
 
   const handlePrev = () => {
     updateDBTable();
@@ -213,9 +214,9 @@ export const AudioPlayer = ({
 
   const handleClick = () => {
     updateDBTable();
-    stopAudio(episodeIndex,seasonIndex,podcast)
-  }
-  
+    stopAudio(episodeIndex, seasonIndex, podcast);
+  };
+
   return (
     <>
       <Card>
@@ -238,7 +239,7 @@ export const AudioPlayer = ({
             handleNext,
             handlePrev,
             isPlaying,
-            setIsPlaying
+            setIsPlaying,
           }}
         />
 

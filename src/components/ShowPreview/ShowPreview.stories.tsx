@@ -8,7 +8,7 @@ const meta: Meta<ShowPreview> = {
 
 export default meta;
 
-export const Basic: StoryObj<ShowPreview> = {
+export const Basic: StoryObj = {
   args: {
     title: "The Real Thing",
     description:

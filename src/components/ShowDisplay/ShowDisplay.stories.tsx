@@ -1,5 +1,5 @@
 import { StoryObj, Meta } from "@storybook/react";
-import { ShowDisplay , Seasons} from "./ShowDisplay.Presentation";
+import {Seasons} from "./ShowDisplay.Presentation";
 
 type Presentation = {
   phase:"SHOW"
@@ -15,7 +15,6 @@ type Presentation = {
 
 const meta: Meta<Presentation> = {
   title: "components/ShowDisplay",
-  component: ShowDisplay,
 };
 
 export default meta;

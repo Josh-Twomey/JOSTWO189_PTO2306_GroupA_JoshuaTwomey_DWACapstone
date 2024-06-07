@@ -68,7 +68,7 @@ export const Navbar = () => {
 
   async function deleteFavourites() {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("favourites")
         .delete()
         .neq("episode_title", "")
@@ -83,7 +83,7 @@ export const Navbar = () => {
 
     async function deleteHistory() {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from("history")
           .delete()
           .neq("episode_title", "");

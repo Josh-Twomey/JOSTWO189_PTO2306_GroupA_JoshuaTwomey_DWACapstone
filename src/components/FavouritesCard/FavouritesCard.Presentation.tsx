@@ -98,7 +98,7 @@ export const FavouritesCard = ({ title, description, episode, image, season, epi
   const removehandler = (episodetitle: string) => {
         async function removedata(episodetitle: string) {
           try {
-            const { data, error } = await supabase
+            const { error } = await supabase
               .from("favourites")
               .delete()
               .eq("episode_title", episodetitle);

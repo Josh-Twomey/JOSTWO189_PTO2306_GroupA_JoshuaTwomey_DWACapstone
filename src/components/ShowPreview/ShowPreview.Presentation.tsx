@@ -7,7 +7,7 @@ import {
 } from "@mui/icons-material";
 import { IconButton, Typography, Paper, Button } from "@mui/material";
 import { supabase } from "../Auth"; // Assuming Auth.js holds Supabase instance
-import { number } from "zod";
+
 
 const Title = styled(Typography)`
   font-size: 1rem;
@@ -65,27 +65,6 @@ const PlayButton = styled(Button)`
 const PlayIcon = styled(PlayCircleOutlineTwoTone)``;
 
 
-type HistoryDB = {
-  id: string;
-  user_id: string;
-  episode_title: string;
-  timestamp: number;
-  created: string;
-}[];
-
-type FavDB = {
-  id: string;
-  user_id: string;
-  episode_title: string;
-  created: string;
-  podcast_title: string;
-  episode: number;
-  season: number;
-  Fav: boolean;
-  podcast_img: string;
-  description: string;
-}[];
-
 export type ShowPreview = {
   episodeTitle: string;
   podcastTitle: string;
@@ -118,12 +97,12 @@ export const ShowPreview = ({
         const historyResponse = await supabase
           .from("history")
           .select("*")
-          .eq("user_id", user?.id);
+          .eq("user_id", user);
 
         const favsResponse = await supabase
           .from("favourites")
           .select("*")
-          .eq("user_id", user?.id);
+          .eq("user_id", user);
 
         if (historyResponse.error || favsResponse.error) {
           throw historyResponse.error || favsResponse.error;
@@ -146,7 +125,7 @@ export const ShowPreview = ({
     };
 
     fetchData();
-  }, [user?.id, episodeTitle]); // Update on user or episode title change
+  }, [user, episodeTitle]); // Update on user or episode title change
 
   const handleFavClick = async () => {
     setIsFav(!isFav);
@@ -162,7 +141,7 @@ export const ShowPreview = ({
           podcast_title: podcastTitle,
           episode_title: episodeTitle,
           podcast_img: image,
-          user_id: user.id,
+          user_id: user,
           description,
           episode,
           Fav: true,

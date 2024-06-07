@@ -137,7 +137,7 @@ export const ShowDisplay = (props: Presentation) => {
     async function getUserData() {
       await supabase.auth.getUser().then((value) => {
         if (value.data?.user) {
-          setUser(value.data.user);
+          setUser(value.data.user.id);
         }
       });
     }
@@ -145,7 +145,6 @@ export const ShowDisplay = (props: Presentation) => {
   }, []);
 
     
-
 
   const handleChange = (event: any) => {
     setSeasonIndex(event.target.value);
