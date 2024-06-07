@@ -23,7 +23,7 @@ export const Single = () => {
   const podcast = useStore(store, (state) => state.show);
   const phase = useStore(store, (state) => state.phase);
   const page = useStore(store, (state) => state.page)
-  console.log(phase)
+ 
   return (
     <ShowDisplay
       phase={phase}
