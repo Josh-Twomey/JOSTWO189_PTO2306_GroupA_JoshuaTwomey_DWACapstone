@@ -105,12 +105,12 @@ export const FavouriteList = (props: Presentation) => {
       case 3:
         return [...favs].sort(
           (a, b) =>
-            new Date(b.created).getTime() - new Date(a.created).getTime()
+            new Date(a.created).getTime() - new Date(b.created).getTime()
         );
       case 4:
         return [...favs].sort(
           (a, b) =>
-            new Date(a.created).getTime() - new Date(b.created).getTime()
+            new Date(b.created).getTime() - new Date(a.created).getTime()
         );
       default:
         throw new Error("Invalid sort option");
