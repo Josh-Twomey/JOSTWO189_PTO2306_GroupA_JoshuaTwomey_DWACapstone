@@ -28,7 +28,16 @@ const Base = styled(Paper)`
 
 
 export const AuthPresentation = () => {
+  const navigate = useNavigate();
+
   
+  useEffect(() => {
+    supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "SIGNED_IN") {
+        navigate("/list");
+      } 
+    });
+  },[])
 
   return (
     <Wrapper>
