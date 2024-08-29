@@ -38,7 +38,7 @@ export const AuthPresentation = () => {
         navigate("/");
       }
     });
-  })
+  },[])
 
   return (
     <Wrapper>
